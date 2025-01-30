@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,20 +6,28 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { dummymessages } from "@/constants/messages";
+import Voice from "@react-native-voice/voice";
 
 const VoiceAssistantUI = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "How are you?", sender: "user" },
-    { id: 2, text: "I'm fine, How may I help you today.", sender: "bot" },
-    {
-      id: 3,
-      text: "Create an image of a dog playing with a cat",
-      sender: "user",
-    },
-    { id: 4, image: "https://via.placeholder.com/150", sender: "bot" }, // Replace with actual image URL
-  ]);
+  const [messages, setMessages] = useState(dummymessages);
+  const [recording, setRecording] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
+  // Toggle recording state
+  const toggleRecording = () => {
+    setRecording((prev) => !prev);
+  };
+  const clear = () => {
+    setMessages([]);
+  };
+  const stopSpeaking = () => {
+    setSpeaking(false);
+  };
+  useEffect(() => {});
   return (
     <View style={styles.container}>
       {/* Assistant Header */}
@@ -51,15 +59,24 @@ const VoiceAssistantUI = () => {
         ))}
       </ScrollView>
 
-      {/* Microphone Button */}
-      <TouchableOpacity style={styles.micButton}>
-        <Image
-          source={{
-            uri: "https://cdn-icons-png.flaticon.com/512/3845/3845763.png",
-          }}
-          style={styles.micIcon}
-        />
-      </TouchableOpacity>
+      {/* Audio Controls */}
+      <View style={styles.audio}>
+        <Pressable onPress={() => setMessages([])}>
+          <Text>Clear</Text>
+        </Pressable>
+        <TouchableOpacity
+          style={[
+            styles.micButton,
+            { backgroundColor: isRecording ? "red" : "green" }, // Change color based on recording state
+          ]}
+          onPress={toggleRecording}
+        >
+          <FontAwesome name="microphone" size={30} color="white" />
+        </TouchableOpacity>
+        <Pressable>
+          <Text>Stop</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -70,7 +87,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
-    paddingTop: 40,
   },
   header: {
     flexDirection: "row",
@@ -116,16 +132,21 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   micButton: {
-    alignSelf: "center",
-    backgroundColor: "#ff3b30",
-    padding: 15,
-    borderRadius: 50,
-    position: "absolute",
-    bottom: 30,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 80,
   },
-  micIcon: {
-    width: 40,
-    height: 40,
-    tintColor: "#fff",
+  audio: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+    elevation: 3,
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
   },
 });
