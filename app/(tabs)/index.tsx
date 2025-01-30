@@ -27,7 +27,12 @@ const VoiceAssistantUI = () => {
   const stopSpeaking = () => {
     setSpeaking(false);
   };
-  useEffect(() => {});
+
+  useEffect(() => {
+    Voice.onSpeechStart = speechStartHandler;
+    Voice.onSpeechEnd = speechEndHandler;
+    Voice.onSpeechResults = speechResultsHandler;
+  });
   return (
     <View style={styles.container}>
       {/* Assistant Header */}
