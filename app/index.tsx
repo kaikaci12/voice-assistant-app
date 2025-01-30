@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   View,
   Pressable,
+  Text,
 } from "react-native";
 
 import { HelloWave } from "@/components/HelloWave";
@@ -27,9 +28,8 @@ export default function HomeScreen() {
           style={styles.image}
         />
       </View>
-
       <Pressable onPress={() => router.push("/(tabs)")} style={styles.button}>
-        Continue
+        <Text>Continue</Text>
       </Pressable>
     </SafeAreaView>
   );

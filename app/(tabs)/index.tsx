@@ -17,22 +17,93 @@ const VoiceAssistantUI = () => {
   const [recording, setRecording] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
-  // Toggle recording state
-  const toggleRecording = () => {
-    setRecording((prev) => !prev);
-  };
-  const clear = () => {
-    setMessages([]);
-  };
-  const stopSpeaking = () => {
-    setSpeaking(false);
-  };
-
+  // Initialize Voice
   useEffect(() => {
+    if (!Voice) {
+      console.error(
+        "Voice is undefined. Check library installation and linking."
+      );
+      return;
+    }
+    // Set up event listeners
     Voice.onSpeechStart = speechStartHandler;
     Voice.onSpeechEnd = speechEndHandler;
     Voice.onSpeechResults = speechResultsHandler;
-  });
+    Voice.onSpeechError = speechErrorHandler;
+
+    return () => {
+      // Clean up event listeners
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  // Speech start handler
+  const speechStartHandler = () => {
+    console.log("Speech started");
+  };
+
+  // Speech end handler
+  const speechEndHandler = () => {
+    console.log("Speech ended");
+  };
+
+  // Speech results handler
+  const speechResultsHandler = (event) => {
+    const text = event.value[0]; // Get the recognized text
+    console.log("Speech results:", text);
+    addMessage(text, "user"); // Add the recognized text as a user message
+  };
+
+  // Speech error handler
+  const speechErrorHandler = (event) => {
+    console.log("Speech error:", event.error);
+    setRecording(false); // Stop recording on error
+  };
+
+  // Start recording
+  const startRecording = async () => {
+    try {
+      await Voice.start("en-US"); // Start recording with English language
+      setRecording(true);
+      console.log("Recording started");
+    } catch (error) {
+      console.log("Error starting recording:", error);
+    }
+  };
+
+  // Stop recording
+  const stopRecording = async () => {
+    try {
+      await Voice.stop(); // Stop recording
+      setRecording(false);
+      console.log("Recording stopped");
+    } catch (error) {
+      console.log("Error stopping recording:", error);
+    }
+  };
+
+  // Stop speaking (e.g., stop text-to-speech or audio playback)
+  const stopSpeaking = () => {
+    // Add logic to stop any ongoing audio playback or text-to-speech
+    console.log("Stopping speaking...");
+    setSpeaking(false);
+  };
+
+  // Add a message to the chat
+  const addMessage = (text, sender) => {
+    const newMessage = {
+      id: messages.length + 1,
+      text,
+      sender,
+    };
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
+
+  // Clear all messages
+  const clearMessages = () => {
+    setMessages([]);
+  };
+
   return (
     <View style={styles.container}>
       {/* Assistant Header */}
@@ -66,19 +137,19 @@ const VoiceAssistantUI = () => {
 
       {/* Audio Controls */}
       <View style={styles.audio}>
-        <Pressable onPress={() => setMessages([])}>
+        <Pressable onPress={clearMessages}>
           <Text>Clear</Text>
         </Pressable>
         <TouchableOpacity
           style={[
             styles.micButton,
-            { backgroundColor: isRecording ? "red" : "green" }, // Change color based on recording state
+            { backgroundColor: recording ? "red" : "green" }, // Change color based on recording state
           ]}
-          onPress={toggleRecording}
+          onPress={recording ? stopRecording : startRecording}
         >
           <FontAwesome name="microphone" size={30} color="white" />
         </TouchableOpacity>
-        <Pressable>
+        <Pressable onPress={stopSpeaking}>
           <Text>Stop</Text>
         </Pressable>
       </View>
